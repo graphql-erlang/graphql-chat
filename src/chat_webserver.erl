@@ -11,7 +11,10 @@ start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-  io:format("* Init webserver~n"),
+  Ip = case os:getenv("WEBMACHINE_IP") of false -> "0.0.0.0"; WebmashineIP -> WebmashineIP end,
+  Port = case os:getenv("PORT") of false -> 8080; Any -> list_to_integer(Any) end,
+
+  io:format("* Init webserver. IP: ~p, PORT: ~p~n", [Ip, Port]),
 
   Dispatch = cowboy_router:compile([
     {'_', [
@@ -22,7 +25,10 @@ init([]) ->
     ]}
   ]),
 
-  cowboy:start_http(http, 100, [{port, 8080}], [
+  cowboy:start_http(http, 100, [
+    {ip, Ip},
+    {port, Port}
+  ], [
     {env, [{dispatch, Dispatch}]},
     {onrequest, fun cowboy_session:on_request/1}
   ]),
