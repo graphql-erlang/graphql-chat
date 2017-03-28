@@ -9,7 +9,9 @@
    [
     kernel,
     stdlib,
-    cowboy
+    cowboy,
+    jsx,
+    graphql
    ]},
   {env,[]},
   {modules, []},
