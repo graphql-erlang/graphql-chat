@@ -26,7 +26,6 @@ init([]) ->
   ]),
 
   cowboy:start_http(http, 100, [
-    {ip, Ip},
     {port, Port}
   ], [
     {env, [{dispatch, Dispatch}]},
