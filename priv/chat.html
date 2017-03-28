@@ -3,7 +3,8 @@
     <head>
         <title>Simple Chat</title>
         <script>
-            var ws = new WebSocket("ws://" + location.host + "/ws/");
+            var protocol = location.protocol === "https:" ? "wss:" : "ws:";
+            var ws = new WebSocket(protocol + "//" + location.host + "/ws/");
 
             ws.onopen = function() {
               console.log("WS OPEN!");
