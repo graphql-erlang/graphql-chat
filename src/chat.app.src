@@ -9,7 +9,9 @@
    [
     kernel,
     stdlib,
+    inets, ssl,
     cowboy,
+    gproc, cowboy_session, uuid,
     jsx,
     graphql
    ]},

@@ -5,7 +5,6 @@
 
 type()-> ?OBJECT("Query", "Root object type for query", #{
 
-  "hello" => ?FIELD(?STRING, "hello", fun() -> <<"ok">> end),
-  "user" => ?FIELD(fun chatql_user:type/0, "Current user", fun chatql_user:resolver/3)
+  "hello" => ?FIELD(?STRING, "hello", fun() -> <<"ok">> end)
 
 }).

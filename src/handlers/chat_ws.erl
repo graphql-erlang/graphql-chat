@@ -5,20 +5,29 @@
 -export([websocket_info/3, websocket_terminate/3, terminate/3]).
 
 
-init(_, Req, Opts) ->
-  io:format("~nINIT WEBSOCKET~n"),
+init(_, Req, _) ->
+  io:format("~n * Init websocket~n"),
+  case cowboy_session:get(<<"is_auth">>, false, Req) of
+    {true, Req1} ->
+      {User, Req2} = cowboy_session:get(<<"user">>, Req1),
+
+      {upgrade, protocol, cowboy_websocket, Req2, #{
+        user => User
+      }};
+
+    {false, _} -> terminate
+  end.
+
+websocket_init(_Type, Req, #{user := User} = Opts) ->
   gproc:reg({p, l, websocket}),
-  {upgrade, protocol, cowboy_websocket, Req, Opts}.
 
-websocket_init(_Type, Req, _Opts) ->
   chat_history:save(#{
-    user => <<"GraphQL-chat">>,
-    msg => <<"Anonymous user was connected (websocket inited)">>
+    user => User,
+    msg => <<"connected">>
   }),
-  {ok, Req, #{}}.
+  {ok, Req, Opts}.
 
-websocket_handle({text, Data}, Req, State) ->
-  {Session, _} = cowboy_req:cookie(<<"session">>, Req),
+websocket_handle({text, Data}, Req, #{user := User} = State) ->
 
   Q = jsx:decode(Data, [return_maps]),
 
@@ -27,7 +36,7 @@ websocket_handle({text, Data}, Req, State) ->
 
   Context = #{
     req => Req,
-    session => Session,
+    user => User,
     ws_pid => self()
   },
 
@@ -60,10 +69,11 @@ websocket_info(Info, Req, State) ->
   io:format("~nWEBSOCKET INFO: ~p~n", [Info]),
   {ok, Req, State}.
 
-websocket_terminate(_, _, _) ->
+websocket_terminate(_, _, #{user := User}) ->
+  gproc:unreg({p, l, websocket}),
   chat_history:save(#{
-    user => <<"GraphQL-chat">>,
-    msg => <<"Anonymous user was gone (websocket terminated)">>
+    user => User,
+    msg => <<"disconnected">>
   }),
   ok.
 

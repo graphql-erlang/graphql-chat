@@ -18,8 +18,11 @@ init([]) ->
 
   Dispatch = cowboy_router:compile([
     {'_', [
+      {"/", chat_handler, []},
+      {"/auth", chat_auth_handler, []},
+      {"/auth_callback", chat_auth_handler, []},
       {"/graphiql", cowboy_static, {priv_file, chat, "graphiql.html"}},
-      {"/", cowboy_static, {priv_file, chat, "chat.html"}},
+      {"/chat", chat_handler, []},
       {"/graphql", chat_graphql_handler, []},
       {"/ws", chat_ws, []}
     ]}

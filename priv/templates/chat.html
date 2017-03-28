@@ -2,13 +2,29 @@
 <html>
     <head>
         <title>Simple Chat</title>
+        <style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            }
+            .msg {
+                clear: left;
+                margin-top: 10px;
+            }
+
+            .msg img {
+                border-radius: 20px;
+                width: 40px;
+                float: left;
+                margin-right: 5px;
+            }
+        </style>
         <script>
             var protocol = location.protocol === "https:" ? "wss:" : "ws:";
             var ws = new WebSocket(protocol + "//" + location.host + "/ws/");
 
             ws.onopen = function() {
               console.log("WS OPEN!");
-              ws.send(makeQ(`subscription { messages { user msg } }`));
+              ws.send(makeQ(`subscription { messages { user { ...User } msg } } ${userFragment()}`));
             };
 
             ws.close = function() {
@@ -31,37 +47,46 @@
             }
 
             function handleMessages(msgs) {
-              var m = document.getElementById('messages');
-              var messagesHtml = msgs.map(function(msg) {
-                return "<li><b>" + msg.user + "</b>: " + msg.msg + "</li>"
-              });
+              var m = document.getElementById('inbox');
+              var messagesHtml = msgs.map(msgDiv);
               m.innerHTML = messagesHtml.join("") + m.innerHTML;
             }
 
             function formSubmit(e) {
-              var name = document.getElementById('name').value;
               var text = document.getElementById('text').value;
-              ws.send(makeQ(`mutation($user: String $msg: String) {
+              ws.send(makeQ(`mutation($msg: String) {
                 message {
-                  send(username: $user text: $msg) { user msg }
+                  send( text: $msg) { user { ...User } msg }
                 }
-              }`, {user: name, msg: text}));
+              } ${userFragment()}`, {msg: text}));
               document.getElementById('text').value = "";
+            }
+
+            function userFragment() {return `fragment User on User {
+                id
+                login
+                avatar_url
+                url:html_url
+            }`;}
+
+            function msgDiv(msg) {
+              return `<div class="msg">
+                <img src="${msg.user.avatar_url}" />
+                <a href="${msg.user.url}">${msg.user.login}</a><br />
+                ${msg.msg}
+              </div>`;
             }
         </script>
     </head>
     <body>
         <form onsubmit="formSubmit(); return false;">
-            username:
-            <input type="text" id="name" value="Anonimous" />
 
             text:
             <input type="text" id="text" />
             <input type="submit">
         </form>
 
-        <div style="inbox">
-            <ul id="messages"></ul>
+        <div style="inbox" id="inbox">
         </div>
     </body>
 </html>
