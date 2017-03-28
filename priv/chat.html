@@ -1,0 +1,66 @@
+<!document html>
+<html>
+    <head>
+        <title>Simple Chat</title>
+        <script>
+            var ws = new WebSocket("ws://" + location.host + "/ws/");
+
+            ws.onopen = function() {
+              console.log("WS OPEN!");
+              ws.send(makeQ(`subscription { messages { user msg } }`));
+            };
+
+            ws.close = function() {
+              console.log('WS closed');
+            };
+
+            ws.onmessage = function(msg) {
+              var data = JSON.parse(msg.data)
+              console.log("Msg: ", data);
+              if(data.data.messages) {
+                handleMessages(data.data.messages);
+              }
+            };
+
+            function makeQ(query, variables) {
+              return JSON.stringify({
+                "query": query,
+                "variables": variables
+              })
+            }
+
+            function handleMessages(msgs) {
+              var m = document.getElementById('messages');
+              var messagesHtml = msgs.map(function(msg) {
+                return "<li><b>" + msg.user + "</b>: " + msg.msg + "</li>"
+              });
+              m.innerHTML = messagesHtml.join("") + m.innerHTML;
+            }
+
+            function formSubmit(e) {
+              var name = document.getElementById('name').value;
+              var text = document.getElementById('text').value;
+              ws.send(makeQ(`mutation($user: String $msg: String) {
+                message {
+                  send(username: $user text: $msg) { user msg }
+                }
+              }`, {user: name, msg: text}));
+              document.getElementById('text').value = "";
+            }
+        </script>
+    </head>
+    <body>
+        <form onsubmit="formSubmit(); return false;">
+            username:
+            <input type="text" id="name" value="Anonimous" />
+
+            text:
+            <input type="text" id="text" />
+            <input type="submit">
+        </form>
+
+        <div style="inbox">
+            <ul id="messages"></ul>
+        </div>
+    </body>
+</html>

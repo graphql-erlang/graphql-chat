@@ -1,0 +1,20 @@
+{application, chat,
+ [{description, "An OTP application"},
+  {vsn, "0.0.1"},
+  {registered, [
+   chat
+  ]},
+  {mod, { chat_app, []}},
+  {applications,
+   [
+    kernel,
+    stdlib,
+    cowboy
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
