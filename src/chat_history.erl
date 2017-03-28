@@ -40,6 +40,9 @@ handle_call({save, Msg}, _From, #state{history = History} = State) ->
       lists:reverse(B);
     _ -> History1
   end,
+
+  gproc:send({p,l, msg}, {newmsg, Msg}),
+
   {reply, ok, State#state{ history = History2}};
 
 handle_call(get, _From, #state{history = History} = State) ->

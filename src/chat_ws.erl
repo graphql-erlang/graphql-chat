@@ -11,11 +11,13 @@ init(_, Req, Opts) ->
   {upgrade, protocol, cowboy_websocket, Req, Opts}.
 
 websocket_init(_Type, Req, _Opts) ->
+  chat_history:save(#{
+    user => <<"GraphQL-chat">>,
+    msg => <<"Anonymous user was connected (websocket inited)">>
+  }),
   {ok, Req, #{}}.
 
 websocket_handle({text, Data}, Req, State) ->
-  io:format("IMA! HANDLE THIS! State: ~p, Data: ~p~n", [State, Data]),
-
   {Session, _} = cowboy_req:cookie(<<"session">>, Req),
 
   Q = jsx:decode(Data, [return_maps]),
@@ -58,8 +60,11 @@ websocket_info(Info, Req, State) ->
   io:format("~nWEBSOCKET INFO: ~p~n", [Info]),
   {ok, Req, State}.
 
-websocket_terminate(Reason, _, _) ->
-  io:format("~nWescoket terminate: ~p", [Reason]),
+websocket_terminate(_, _, _) ->
+  chat_history:save(#{
+    user => <<"GraphQL-chat">>,
+    msg => <<"Anonymous user was gone (websocket terminated)">>
+  }),
   ok.
 
 terminate(_, _Req, _State) ->

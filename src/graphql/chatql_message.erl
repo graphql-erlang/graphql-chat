@@ -17,7 +17,6 @@ resolver(_, _, #{session := Session}) ->
   chat_user:get_user(Session).
 
 subscription_resolver(Obj,_, #{resolve := query}) ->
-  io:format("Subscription resolver query: ~p~n", [Obj]),
   [Obj];
 subscription_resolver(_,_, #{ws_pid := SubPid} = Context) ->
   SubPid ! {sub, msg, Context},
@@ -42,7 +41,6 @@ mutation() -> ?OBJECT("MessageMutation", "Mutation for messages", #{
     },
 
     chat_history:save(Msg),
-    gproc:send({p,l, msg}, {newmsg, Msg}),
 
     Msg
   end)
