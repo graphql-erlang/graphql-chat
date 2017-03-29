@@ -15,7 +15,12 @@ handle(Req, State) ->
       {ok, chat:reply("templates/chat.html", User, Req2), State};
 
     {false, Req1} ->
-      {ok, chat:reply("templates/forbidden.html", #{}, Req1), State}
+      Args = #{
+        <<"client_id">> => list_to_binary(os:getenv("GITHUB_CLIENT_ID")),
+        <<"redirect_uri">> => list_to_binary(os:getenv("GITHUB_REDIRECT_URI", "http://127.0.0.1:8080/auth_callback"))
+      },
+
+      {ok, chat:reply("templates/auth.html", Args, Req), State}
 
   end.
 

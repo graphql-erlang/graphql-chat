@@ -11,20 +11,22 @@ start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 init([]) ->
-  Ip = case os:getenv("WEBMACHINE_IP") of false -> "0.0.0.0"; WebmashineIP -> WebmashineIP end,
   Port = case os:getenv("PORT") of false -> 8080; Any -> list_to_integer(Any) end,
 
-  io:format("* Init webserver. IP: ~p, PORT: ~p~n", [Ip, Port]),
+  io:format("* Init webserver. PORT: ~p~n", [Port]),
 
   Dispatch = cowboy_router:compile([
     {'_', [
       {"/", chat_handler, []},
-      {"/auth", chat_auth_handler, []},
       {"/auth_callback", chat_auth_handler, []},
       {"/graphiql", cowboy_static, {priv_file, chat, "graphiql.html"}},
-      {"/chat", chat_handler, []},
       {"/graphql", chat_graphql_handler, []},
-      {"/ws", chat_ws, []}
+      {"/ws", chat_ws, []},
+
+%%      {"/static/[...]", cowboy_static, {priv_div, chat, "static"}}  %%  FIXME: does not work :(
+      {"/static/GitHub-Mark-32px.png", cowboy_static, {priv_file, chat, "static/GitHub-Mark-32px.png"}},
+      {"/static/chat.js", cowboy_static, {priv_file, chat, "static/chat.js"}},
+      {"/static/chat.css", cowboy_static, {priv_file, chat, "static/chat.css"}}
     ]}
   ]),
 
