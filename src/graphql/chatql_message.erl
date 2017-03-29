@@ -24,7 +24,8 @@ subscription_resolver(_,_, #{ws_pid := SubPid} = Context) ->
 type() -> ?OBJECT("Message", "Chat item", #{
 
   "user" => ?FIELD(fun chatql_user:type/0, "Message owner", fun(Obj)-> maps:get(user, Obj) end),
-  "msg" => ?FIELD(?STRING, "Message", fun(Obj)-> maps:get(msg, Obj) end)
+  "msg" => ?FIELD(?STRING, "Message", fun(Obj)-> maps:get(msg, Obj) end),
+  "created" => ?FIELD(fun chatql_scalar_datetime:type/0, "Datetime of creatimg", fun(#{date := Date})-> Date end)
 
 }).
 
@@ -34,7 +35,8 @@ mutation() -> ?OBJECT("MessageMutation", "Mutation for messages", #{
   }, fun(_, #{<<"text">> := Text}, #{user := User}) ->
     Msg = #{
       user => User,
-      msg => Text
+      msg => Text,
+      date => calendar:universal_time()
     },
 
     chat_history:save(Msg),

@@ -23,7 +23,8 @@ websocket_init(_Type, Req, #{user := User} = Opts) ->
 
   chat_history:save(#{
     user => User,
-    msg => <<"connected">>
+    msg => <<"connected">>,
+    date => calendar:universal_time()
   }),
   {ok, Req, Opts}.
 
@@ -73,7 +74,8 @@ websocket_terminate(_, _, #{user := User}) ->
   gproc:unreg({p, l, websocket}),
   chat_history:save(#{
     user => User,
-    msg => <<"disconnected">>
+    msg => <<"disconnected">>,
+    date => calendar:universal_time()
   }),
   ok.
 

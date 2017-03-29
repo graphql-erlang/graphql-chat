@@ -2,12 +2,12 @@ var protocol = location.protocol === "https:" ? "wss:" : "ws:";
 var ws = new WebSocket(protocol + "//" + location.host + "/ws/");
 
 ws.onopen = function() {
-  console.log("WS OPEN!");
-  ws.send(makeQ(`subscription { messages { user { ...User } msg } } ${userFragment()}`));
+  document.getElementById("online-status").innerHTML = "online";
+  ws.send(makeQ(`subscription { messages { user { ...User } msg created } } ${userFragment()}`));
 };
 
 ws.close = function() {
-  console.log('WS closed');
+  document.getElementById("online-status").innerHTML = "offline";
 };
 
 ws.onmessage = function(msg) {
@@ -35,7 +35,7 @@ function formSubmit(e) {
   var text = document.getElementById('text').value;
   ws.send(makeQ(`mutation($msg: String) {
                 message {
-                  send( text: $msg) { user { ...User } msg }
+                  send( text: $msg) { user { ...User } msg created }
                 }
               } ${userFragment()}`, {msg: text}));
   document.getElementById('text').value = "";
@@ -49,9 +49,10 @@ function userFragment() {return `fragment User on User {
             }`;}
 
 function msgDiv(msg) {
+  var dateString = new Date(msg.created * 1000).toLocaleString();
   return `<div class="msg">
     <img src="${msg.user.avatar_url}" />
-    <a href="${msg.user.url}">${msg.user.login}</a><br />
+    <a href="${msg.user.url}">@${msg.user.login}</a> [${dateString}]<br />
     ${msg.msg}
   </div>`;
 }
