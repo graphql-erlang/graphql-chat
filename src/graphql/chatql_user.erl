@@ -2,7 +2,37 @@
 -include_lib("graphql/include/types.hrl").
 
 %% API
--export([type/0]).
+-export([
+  subscription_rooms_resolver/3,
+
+  room_users/0,
+  type/0
+]).
+
+subscription_rooms_resolver(Obj, _, #{resolve := query}) ->
+  io:format("Obj ib rooms: ~p~n", [Obj]),
+  #{
+    users => [maps:get(user, Obj)],
+    action => maps:get(action, Obj)
+  };
+subscription_rooms_resolver(_, #{<<"room_id">> := RoomId}, #{ws_pid := WsPid} = Context) ->
+  WsPid ! {sub, user, RoomId, Context},
+  #{
+    users => lists:map(fun(UserId)->
+        chat_history:get_user(UserId)
+      end, chat_history:room_users(RoomId)),
+    action => null
+  }.
+
+room_users()-> ?OBJECT("RoomUsersSubscription", "", #{
+  "users" => ?FIELD(?LIST(fun type/0), "List of room users or user with action", fun(#{users := Users}) -> Users end),
+  "action" => ?FIELD(fun room_user_action_enum/0, "User actions", fun(#{action := Action})-> Action end)
+}).
+
+room_user_action_enum() -> ?ENUM("UserActionSubscription", "connected/disconnected", [
+  ?ENUM_VAL(online, "ENTERED", "User entered into room"),
+  ?ENUM_VAL(offline, "LEFT", "User left the chat")
+]).
 
 type()-> ?OBJECT("User", "Github user", #{
   <<"avatar_url">> => ?FIELD(?STRING),

@@ -15,6 +15,7 @@
 
 
 subscription_resolver(Obj,_, #{resolve := query}) ->
+  io:format("Resolver messages: ~p~n", [Obj]),
   [Obj];
 subscription_resolver(_,_, #{ws_pid := SubPid} = Context) ->
   SubPid ! {sub, msg, Context},
@@ -33,6 +34,7 @@ mutation() -> ?OBJECT("MessageMutation", "Mutation for messages", #{
   "send" => ?FIELD(type(), "Send message", #{
     "text" => ?ARG(?STRING, "Message data")
   }, fun(_, #{<<"text">> := Text}, #{user := User}) ->
+
     Msg = #{
       user => User,
       msg => Text,

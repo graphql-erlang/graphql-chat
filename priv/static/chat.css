@@ -17,8 +17,49 @@
     bottom: 60px;
     left: 0;
     right: 0;
+    overflow: hidden;
+}
+
+.inbox {
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 250px;
     overflow: auto;
 }
+
+.online_users_container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 250px;
+    border-left: 1px solid #ccc;
+}
+
+.online_users_list {
+    position: absolute;
+    top: 25px;
+    bottom: 150px;
+    right: 0;
+    left: 0;
+    border-bottom: 1px solid #ccc;
+    overflow: auto;
+}
+
+.online_users_log {
+    display: block;
+    position: absolute;
+    height: 150px;
+    bottom: 0px;
+    right: 0;
+    left: 0;
+    overflow: auto;
+    margin: 0;
+    padding: 0;
+}
+
 
 .nav-user-logo {
     width: 45px;
