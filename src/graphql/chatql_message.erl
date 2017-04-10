@@ -22,7 +22,7 @@ subscription_resolver(_,_, #{ws_pid := SubPid} = Context) ->
   chat_history:get().
 
 
-type() -> ?OBJECT("Message", "Chat item", #{
+type() -> ?OBJECT('Message', "Chat item", #{
 
   "user" => ?FIELD(fun chatql_user:type/0, "Message owner", fun(Obj)-> maps:get(user, Obj) end),
   "msg" => ?FIELD(?STRING, "Message", fun(Obj)-> maps:get(msg, Obj) end),
@@ -30,7 +30,7 @@ type() -> ?OBJECT("Message", "Chat item", #{
 
 }).
 
-mutation() -> ?OBJECT("MessageMutation", "Mutation for messages", #{
+mutation() -> ?OBJECT('MessageMutation', "Mutation for messages", #{
   "send" => ?FIELD(type(), "Send message", #{
     "text" => ?ARG(?STRING, "Message data")
   }, fun(_, #{<<"text">> := Text}, #{user := User}) ->

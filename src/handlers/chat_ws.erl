@@ -37,7 +37,11 @@ websocket_handle({text, Data}, Req, #{current_user := User} = State) ->
     ws_pid => self()
   },
 
-  Response = graphql:execute(chatql_schema:schema_ws(), Document, Variables, #{}, Context),
+  Response = graphql:run(Document, #{
+    variable_values => Variables,
+    context => Context,
+    return_maps => true
+  }),
 
   io:format("Response: ~p~n", [Response]),
 
@@ -86,9 +90,9 @@ websocket_info({sub, Channel, Context}, Req, State)->
 websocket_info({newmsg, Msg}, Req, State) ->
   #{msg := #{ context := Context}} = State,
 
-  Reply = graphql_execution:execute_operation(Msg, Context#{resolve => query}),
+  Reply = [{data, graphql_execution:execute_operation(Msg, Context#{resolve => query})}],
 
-  {reply, {text, jsx:encode(Reply#{operation => subscription})}, Req, State};
+  {reply, {text, jsx:encode([{operation, subscription}|Reply])}, Req, State};
 
 
 

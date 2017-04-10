@@ -22,7 +22,11 @@ handle(Req, State)->
     session => Session
   },
 
-  Response = graphql:execute(chatql_schema:schema_http(), Document, Variables, #{}, Context),
+  Response = graphql:run(Document, #{
+    variable_values => Variables,
+    context => Context,
+    return_maps => true
+  }),
 
   {ok, Reply} = cowboy_req:reply(200, [
     {<<"content-type">>, <<"application/json">>}
