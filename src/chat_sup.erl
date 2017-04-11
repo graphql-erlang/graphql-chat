@@ -25,7 +25,7 @@ start_link() ->
 init([]) ->
     {ok, { {one_for_one, 10, 1}, [
         ?CHILD(chat_history, worker),
-        ?CHILD(graphql_srv, worker, [fun chatql_schema:schema_ws/0]),
+        ?CHILD(graphql_srv, worker, [fun chatql_schema:schema_ws/0, #{introspection => true}]),
 
         ?CHILD(chat_webserver, worker)
     ]} }.
